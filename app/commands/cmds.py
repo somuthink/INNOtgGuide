@@ -16,10 +16,25 @@ from app.user_class import User, UserType
 async def _(message: types.Message):
     user_id = message.from_id
 
-    if user_id in users.keys():
+
+    admin = users.get('admins').get(str(user_id))
+    if admin != None:
         await message.reply(
-            text=f'⭐Привет админ {users.get(f"{user_id}")}⭐'
+            text=f'⭐Привет админ __{admin}__⭐',
+            parse_mode='MarkdownV2',
         )
+        await User_States.admin.set()
+        return None
+
+    registred = users.get('default').get(str(user_id))
+    if registred != None:
+        await message.reply(
+            text=f'⭐Привет __{registred}__⭐',
+            parse_mode='MarkdownV2',
+            reply_markup=activity_kb
+        )
+        await User_States.admin.set()
+        return None
 
 
 

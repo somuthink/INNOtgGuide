@@ -9,7 +9,7 @@ class UserType(StrEnum):
 
 
 @dataclass
-class User:
+class Default:
     user_id: int
-    type: UserType = UserType.DEFAULT
-    name: Optional[str] = None
+    user_type: str
+    name:str
