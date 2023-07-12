@@ -5,4 +5,5 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 class User_States(StatesGroup):
     enter_name = State()
-    admin_monitoring = State()
+    default = State()
+    admin_chatting = State()
