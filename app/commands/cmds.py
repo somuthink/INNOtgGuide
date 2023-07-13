@@ -11,6 +11,7 @@ from math_problem_generator import generator
 
 from app.data.navigations import *
 
+
 def get_users():
     with open(users_path) as f:
         return json.load(f)
@@ -177,6 +178,7 @@ async def _(call: types.CallbackQuery, callback_data: dict):
         await call.message.edit_text(text, reply_markup=campus_kb)
     except aiogram.utils.exceptions.MessageNotModified:
         pass
+    await bot.answer_callback_query(call.id)
 
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="campus"), state="*")
@@ -192,6 +194,7 @@ async def _(call: types.CallbackQuery, callback_data: dict):
     #     parse_mode="MarkdownV2",
     #     reply_markup=campus_kb,
     # )
+    await bot.answer_callback_query(call.id)
 
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="leave"), state="*")
@@ -201,6 +204,7 @@ async def _(call: types.CallbackQuery, callback_data: dict):
         text=f"Чат покинут\nПиши /main чтобы воспользоваться главным меню",
         parse_mode="MarkdownV2",
     )
+    await bot.answer_callback_query(call.id)
 
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="nav"), state="*")
@@ -209,6 +213,7 @@ async def _(call: types.CallbackQuery, callback_data: dict):
         await call.message.edit_text(f"Выбери место путь до которого хочешь узнать ", reply_markup=places_kb)
     except aiogram.utils.exceptions.MessageNotModified:
         pass
+    await bot.answer_callback_query(call.id)
 
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="call"), state="*")
@@ -251,7 +256,6 @@ async def _(call: types.CallbackQuery, callback_data: dict):
 
     place = callback_data["choice"]
 
+    await call.message.answer(text=f"{navigations[place]}")
 
-
-
-    await call.message.answer(text = f"{navigations[place]}")
+    await bot.answer_callback_query(call.id)
