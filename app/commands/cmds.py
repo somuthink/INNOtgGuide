@@ -9,6 +9,7 @@ from dataclasses import asdict
 import json
 from math_problem_generator import generator
 
+from app.data.navigations import *
 
 def get_users():
     with open(users_path) as f:
@@ -75,6 +76,7 @@ async def _(message: types.Message):
 
 @dp.message_handler(commands="main", state="*")
 async def _(message: types.Message):
+    await User_States.default.set()
     user_id = message.from_id
     users = get_users()
     user = users[str(user_id)]
@@ -179,11 +181,17 @@ async def _(call: types.CallbackQuery, callback_data: dict):
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="campus"), state="*")
 async def _(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer(
-        text=f"Выбирай кампус в котором сейчас находишься",
-        parse_mode="MarkdownV2",
-        reply_markup=campus_kb,
-    )
+    try:
+        await call.message.edit_text(text=f"Выбирай кампус в котором сейчас находишься",
+                                     parse_mode="MarkdownV2",
+                                     reply_markup=campus_kb, )
+    except aiogram.utils.exceptions.MessageNotModified:
+        pass
+    # await call.message.answer(
+    #     text=f"Выбирай кампус в котором сейчас находишься",
+    #     parse_mode="MarkdownV2",
+    #     reply_markup=campus_kb,
+    # )
 
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="leave"), state="*")
@@ -197,7 +205,10 @@ async def _(call: types.CallbackQuery, callback_data: dict):
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="nav"), state="*")
 async def _(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer(f"Вы нажали на кнопку ")
+    try:
+        await call.message.edit_text(f"Выбери место путь до которого хочешь узнать ", reply_markup=places_kb)
+    except aiogram.utils.exceptions.MessageNotModified:
+        pass
 
 
 @dp.callback_query_handler(main_menu_callback.filter(choice="call"), state="*")
@@ -211,13 +222,36 @@ async def _(call: types.CallbackQuery, callback_data: dict):
     )[0]
     question = " + ".join(map(str, math_problem["numbers"]))
 
-    await call.message.answer(
-        f"Напиши сообщение вожатым чтобы они тебе помогли\n \nНо сначал реши пример \(это нужно для защиты от спама\) \n`{question} = ''`\nответ запиши цифрами перед своим сообщением \n \n Пример: \n 27 Помогите найти кулер",
-        parse_mode="MarkdownV2"
-    )
+    try:
+        await call.message.edit_text(
+            f"Напиши сообщение вожатым чтобы они тебе помогли\n \nНо сначал реши пример \(это нужно для защиты от спама\) \n`{question} = ''`\nответ запиши цифрами перед своим сообщением \n \n Пример: \n 27 Помогите найти кулер",
+            parse_mode="MarkdownV2")
+    except aiogram.utils.exceptions.MessageNotModified:
+        pass
+
+    # await call.message.answer(
+    #     f"Напиши сообщение вожатым чтобы они тебе помогли\n \nНо сначал реши пример \(это нужно для защиты от спама\) \n`{question} = ''`\nответ запиши цифрами перед своим сообщением \n \n Пример: \n 27 Помогите найти кулер",
+    #     parse_mode="MarkdownV2"
+    # )
 
     users[str(user_id)]["user_correct_answer"] = math_problem["solution"]
     with open(users_path, "w") as f:
         json.dump(users, f)
 
     await User_States.admin_chatting.set()
+
+
+@dp.callback_query_handler(places_callback.filter(), state="*")
+async def _(call: types.CallbackQuery, callback_data: dict):
+    user_id = call.from_user.id
+
+    users = get_users()
+
+    user_campus = users[str(user_id)]["user_campus"]
+
+    place = callback_data["choice"]
+
+
+
+
+    await call.message.answer(text = f"{navigations[place]}")

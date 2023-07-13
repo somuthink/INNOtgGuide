@@ -1,3 +1,5 @@
 app/data/config.py
 app/data/admins.json
 app/data/users.json
+.idea
+venv
