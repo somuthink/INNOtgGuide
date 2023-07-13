@@ -29,7 +29,7 @@ leave_admin_chat = InlineKeyboardButton(
 )
 
 
-zero = InlineKeyboardButton("0 🟩", callback_data=campuses_callback.new(choice="0 🟩"))
+zero = InlineKeyboardButton("Универ 🟩", callback_data=campuses_callback.new(choice="0 🟩"))
 first = InlineKeyboardButton("1 🟩", callback_data=campuses_callback.new(choice="1 🟩"))
 second = InlineKeyboardButton("2 🟧", callback_data=campuses_callback.new(choice="2 🟧"))
 third = InlineKeyboardButton("3 🟪", callback_data=campuses_callback.new(choice="3 🟪"))
