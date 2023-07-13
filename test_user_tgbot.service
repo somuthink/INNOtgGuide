@@ -1,0 +1,14 @@
+
+[Unit]
+Description=Telegram Bot
+After=network.target
+
+[Service]
+User=somk
+Group=somk
+WorkingDirectory=/home/somk/INNOtgGuide/
+Environment="PYTHONPATH=/home/somk/INNOtgGuide/"
+ExecStart=/home/somk/INNOtgGuide/.venv/bin/python /home/somk/INNOtgGuide/app/main.py
+
+[Install]
+WantedBy=multi-user.target
