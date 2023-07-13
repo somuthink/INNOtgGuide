@@ -10,6 +10,7 @@ import json
 from math_problem_generator import generator
 
 from app.data.navigations import *
+from app.components.map_generator import *
 
 
 def get_users():
@@ -254,8 +255,13 @@ async def _(call: types.CallbackQuery, callback_data: dict):
 
     user_campus = users[str(user_id)]["user_campus"]
 
-    place = callback_data["choice"]
+    place = navigations[callback_data["choice"]]
 
-    await call.message.answer(text=f"{navigations[place]}")
+    finish_place = place['campus']
+    map = generate_map(user_campus,)
+
+
+
+    await call.message.answer(text=f"{map}")
 
     await bot.answer_callback_query(call.id)
