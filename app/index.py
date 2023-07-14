@@ -17,6 +17,6 @@ dp = Dispatcher(bot=bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
 
-users_path = Path("app/data/users.json")
-admins_path = Path("app/data/admins.json")
+users_path = Path("data/users.json")
+admins_path = Path("data/admins.json")
 

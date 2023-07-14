@@ -15,6 +15,7 @@ class USER_CLASS:
     user_id: int
     user_type: str
     user_name: str
-    user_correct_answer: int
+    tg_user_name : str
+    user_correct_answer: int = 0
     user_campus: str = "0 🟩"
 

@@ -35,13 +35,17 @@ async def _(message: types.Message):
             parse_mode="MarkdownV2"
         )
 
-    async def greet_existing_user(name):
+    async def greet_existing_user(name, user_id):
+        link_to_user = f'<a href="tg://user?id={user_id}">{name}</a>'
+
         await message.reply(
-            text=f"⭐Привет __{name}__⭐ \n Пиши /main чтобы воспользоваться главным меню",
-            parse_mode="MarkdownV2",
+            text=f"⭐Привет {link_to_user}⭐  \n Пиши /main чтобы воспользоваться главным меню",
+            parse_mode="HTML",
         )
 
     user_id = message.from_id
+
+    tg_user_name = message.from_user.username
 
     users = get_users()
 
@@ -54,19 +58,19 @@ async def _(message: types.Message):
         if str(user_id) in admins:
             name = admins[str(user_id)]
             users[str(user_id)] = asdict(
-                USER_CLASS(user_id=user_id, user_type="ADMIN", user_name=name)
+                USER_CLASS(user_id=user_id, user_type="ADMIN", user_name=name, tg_user_name=tg_user_name)
             )
             await greet_admin(name)
         # default
         else:
             await greet_new_user()
 
-    # isn logged
+    # is logged
     else:
         # admin
         if str(user_id) not in admins:
             name = users[str(user_id)]["user_name"]
-            await greet_existing_user(name)
+            await greet_existing_user(name, user_id)
         # default
         else:
             name = users[str(user_id)]["user_name"]
@@ -85,33 +89,37 @@ async def _(message: types.Message):
     name = user["user_name"]
     campus = user["user_campus"]
 
+    link_to_user = f'<a href="tg://user?id={user_id}">{name}</a>'
+
     if user["user_type"] == "Default":
         await message.answer(
-            text=f"__{name}__ ты находишься в кампусе {campus}",
-            parse_mode="MarkdownV2",
+            text=f"{link_to_user} ты находишься в кампусе {campus}",
+            parse_mode="HTML",
             reply_markup=activity_kb,
         )
     else:
         await message.answer(
             text=f"АДМИН",
-            parse_mode="MarkdownV2",
         )
 
 
 @dp.message_handler(state=User_States.enter_name)
 async def _(message: types.Message):
     user_id = message.from_id
+    tg_user_name = message.from_user.username
     name = message.text
     users = get_users()
     users[str(user_id)] = asdict(
-        USER_CLASS(user_id=user_id, user_type="Default", user_name=name)
+        USER_CLASS(user_id=user_id, user_type="Default", user_name=name, tg_user_name=tg_user_name)
     )
     with open(users_path, "w") as f:
         json.dump(users, f)
 
+    link_to_user = f'<a href="tg://user?id={user_id}">{name}</a>'
+
     await message.answer(
-        text=f"Приятно познакомиться ,__{name}__ \n \nТеперь пожалйста выбери свой кампус",
-        parse_mode="MarkdownV2",
+        text=f"Приятно познакомиться ,{link_to_user} \n \nТеперь пожалйста выбери свой кампус",
+        parse_mode="HTML",
         reply_markup=campus_kb,
     )
 
@@ -134,13 +142,17 @@ async def _(message: types.Message):
     user_answer = int(text_words[0])
     user_text = ' '.join(text_words[1:])
 
+
+
     if int(user_answer) == int(answer):
 
         with open(admins_path) as f:
             admins = json.load(f)
         for admin in admins:
+            print(user_id)
+            link_to_user = f'<a href="tg://user?id={user_id}">{name}</a>'
             try:
-                await bot.send_message(admin, text=f"Кампус {campus} - {name} \n{user_text}")
+                await bot.send_message(admin, text=f"Кампус {campus} - {link_to_user} \n{user_text}", parse_mode="HTML")
             except Exception as e:
                 await message.answer(text=str(e))
         math_problem = generator.simple_problems(
@@ -255,13 +267,22 @@ async def _(call: types.CallbackQuery, callback_data: dict):
 
     user_campus = users[str(user_id)]["user_campus"]
 
-    place = navigations[callback_data["choice"]]
+    choice = callback_data["choice"]
 
-    finish_place = place['campus']
-    map = generate_map(user_campus,)
+    place = navigations[choice]
 
+    finish_campus = place['campus']
+    way = generate_map(user_campus, finish_campus)
 
+    advice = place['advice']
 
-    await call.message.answer(text=f"{map}")
+    try:
+        await call.message.edit_text(
+            f"Вот ваш путь чтобы попасть из {user_campus} в {choice}\n \n {way}\n \n{advice}",
+            parse_mode="MarkdownV2")
+    except aiogram.utils.exceptions.MessageNotModified:
+        pass
+
+    # await call.message.answer(text=f"{way}", parse_mode="MarkdownV2")
 
     await bot.answer_callback_query(call.id)
