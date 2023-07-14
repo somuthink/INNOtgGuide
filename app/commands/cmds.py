@@ -29,10 +29,13 @@ async def _(message: types.Message):
         )
         await User_States.enter_name.set()
 
-    async def greet_admin(name):
+    async def greet_admin(name, user_id):
+        link_to_user = f'<a href="tg://user?id={user_id}">{name}</a>'
+
+
         await message.reply(
-            text=f"⭐Привет админ⭐ \n__{name}__",
-            parse_mode="MarkdownV2"
+            text=f"⭐Привет админ⭐ \n{link_to_user}",
+            parse_mode="HTML"
         )
 
     async def greet_existing_user(name, user_id):
@@ -60,7 +63,7 @@ async def _(message: types.Message):
             users[str(user_id)] = asdict(
                 USER_CLASS(user_id=user_id, user_type="ADMIN", user_name=name, tg_user_name=tg_user_name)
             )
-            await greet_admin(name)
+            await greet_admin(name, user_id)
         # default
         else:
             await greet_new_user()
@@ -74,7 +77,7 @@ async def _(message: types.Message):
         # default
         else:
             name = users[str(user_id)]["user_name"]
-            await greet_admin(name)
+            await greet_admin(name, user_id)
 
     with open(users_path, "w") as f:
         json.dump(users, f)
@@ -149,7 +152,6 @@ async def _(message: types.Message):
         with open(admins_path) as f:
             admins = json.load(f)
         for admin in admins:
-            print(user_id)
             link_to_user = f'<a href="tg://user?id={user_id}">{name}</a>'
             try:
                 await bot.send_message(admin, text=f"Кампус {campus} - {link_to_user} \n{user_text}", parse_mode="HTML")
